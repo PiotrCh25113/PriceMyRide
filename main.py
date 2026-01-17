@@ -38,9 +38,11 @@ with col3:
 st.divider()
 
 if st.button("Estimate value", type = "primary", use_container_width=True):
-   if not make or not model or not body or not trim:
+   if not make or not model or not body:
         st.error("Please fill in all fields before estimating.")
    else:
+        if not trim:
+             trim = "base"
         input_data = pd.DataFrame({
             "make": [make.lower().replace(" ", "")],
             "model": [model.lower().replace(" ", "")],
