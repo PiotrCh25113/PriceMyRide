@@ -1,0 +1,64 @@
+import streamlit as st
+import pandas as pd
+import numpy as np
+import joblib
+
+# Load the trained model
+@st.cache_resource
+def load_model():
+    return joblib.load('models/estimate_veh_price.joblib')
+
+
+veh_estim_model = load_model()
+
+
+
+st.title("Price My Ride")
+st.write("Tool which helps you estimate vehicle value (Data is from 2015)")
+
+
+st.divider()
+
+st.header("Provide Vehicle Data")
+
+col1, col2, col3= st.columns(3)
+
+with col1:
+    make = st.text_input("Make")
+    odometer = st.number_input("Mileage", min_value=0)
+
+with col2:
+    model = st.text_input("Model")
+    body = st.text_input("Body type")
+
+with col3:
+    year = st.number_input("Year", min_value=1981, max_value=2015)
+    trim = st.text_input("Trim (eg.428 ix)")
+
+st.divider()
+
+if st.button("Estimate value", type = "primary", use_container_width=True):
+   if not make or not model or not body or not trim:
+        st.error("Please fill in all fields before estimating.")
+   else:
+        input_data = pd.DataFrame({
+            "make": [make.lower().replace(" ", "")],
+            "model": [model.lower().replace(" ", "")],
+            "trim": [trim.lower().replace(" ", "")],
+            "body": [body.lower().replace(" ", "")],
+            "year": [year],
+            "odometer": [odometer]
+        })
+   try:
+            # Predict
+            prediction = veh_estim_model.predict(input_data)
+            
+            # Display result formatted as currency
+            st.success(f"Estimated Price: ${prediction[0]:,.2f}")
+            
+   except Exception as e:
+            st.error(f"Error making prediction: {e}")
+
+
+
+
