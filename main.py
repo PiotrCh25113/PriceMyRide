@@ -52,14 +52,14 @@ if st.button("Estimate value", type = "primary", use_container_width=True):
             "odometer": [odometer]
         })
    try:
-            # Predict
+
             prediction = veh_estim_model.predict(input_data)
             
             # Display result formatted as currency
             st.success(f"Estimated Price: ${prediction[0]:,.2f}")
             
    except Exception as e:
-            st.error(f"Error making prediction: {e}")
+            print(f"Error making prediction: {e}")
 
 
 
