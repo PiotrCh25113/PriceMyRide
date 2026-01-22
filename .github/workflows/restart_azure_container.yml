@@ -30,7 +30,11 @@ jobs:
             RESOURCE_GROUP="${{ vars.RESOURCE_GROUP }}"
             # ---------------------
 
+            az config set extension.use_dynamic_install=yes_without_prompt
+
             az extension add --name containerapp --upgrade
+
+            az version
 
             echo "Getting App ID for '$APP_NAME'..."
             # distinct way to find the app that doesn't rely on the broken 'containerapp' command
