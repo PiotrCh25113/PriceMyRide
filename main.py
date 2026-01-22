@@ -63,8 +63,6 @@ if st.button("Estimate value", type = "primary", use_container_width=True):
    except Exception as e:
             print(f"Error making prediction: {e}")
 
-st.write("JUST TESTING AUTOMATION 2")
-
 
 
 
