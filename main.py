@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import joblib
+from utils.constants import CAR_MAKES, CAR_MODELS, CAR_BODIES, CAR_TRIMS
+
 
 # Load the trained model
 @st.cache_resource
@@ -24,16 +26,16 @@ st.header("Provide Vehicle Data")
 col1, col2, col3= st.columns(3)
 
 with col1:
-    make = st.text_input("Make")
+    make = st.selectbox("Make", CAR_MAKES, index=None)
     odometer = st.number_input("Mileage", min_value=0)
 
 with col2:
-    model = st.text_input("Model")
-    body = st.text_input("Body type")
+    model = st.selectbox("Model", CAR_MODELS, index=None)
+    body = st.selectbox("Body type", CAR_BODIES, index=None)
 
 with col3:
     year = st.number_input("Year", min_value=1981, max_value=2015)
-    trim = st.text_input("Trim (eg.428 ix)")
+    trim = st.selectbox("Trim (optional)", CAR_TRIMS, index=None)
 
 st.divider()
 
