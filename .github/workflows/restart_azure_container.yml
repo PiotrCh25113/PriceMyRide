@@ -1,6 +1,7 @@
 name: Restart Azure Container App
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "main" ]
     paths-ignore:
