@@ -29,6 +29,8 @@ jobs:
             RESOURCE_GROUP="${{ vars.RESOURCE_GROUP }}"
             # ---------------------
 
+            az extension add --name containerapp --upgrade
+
             echo "Getting App ID for '$APP_NAME'..."
             # distinct way to find the app that doesn't rely on the broken 'containerapp' command
             APP_ID=$(az resource show --resource-group "$RESOURCE_GROUP" --name "$APP_NAME" --resource-type "Microsoft.App/containerApps" --query id --output tsv)
