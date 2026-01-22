@@ -3,6 +3,9 @@ name: Restart Azure Container App
 on:
   push:
     branches: [ "main" ]
+    paths-ignore:
+      - '.github/**'
+      - '.gitignore'
   
 
 permissions:
@@ -21,11 +24,20 @@ jobs:
         uses: azure/CLI@v2
         with:
           inlineScript: |
-            az extension add --name containerapp --upgrade --yes
             # --- Configuration ---
             APP_NAME="${{ vars.APP_NAME }}"
             RESOURCE_GROUP="${{ vars.RESOURCE_GROUP }}"
             # ---------------------
+
+            echo "Getting App ID for '$APP_NAME'..."
+            # distinct way to find the app that doesn't rely on the broken 'containerapp' command
+            APP_ID=$(az resource show --resource-group "$RESOURCE_GROUP" --name "$APP_NAME" --resource-type "Microsoft.App/containerApps" --query id --output tsv)
+            
+            if [ -z "$APP_ID" ]; then
+              echo "Error: Could not find Container App. Check your variables!"
+              exit 1
+            fi
+            echo "Found App ID: $APP_ID"
 
             echo "Stopping container app..."
             az containerapp stop --name $APP_NAME --resource-group $RESOURCE_GROUP
