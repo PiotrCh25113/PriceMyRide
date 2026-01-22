@@ -25,47 +25,30 @@ jobs:
         uses: azure/CLI@v2
         with:
           inlineScript: |
-            # --- Configuration ---
             APP_NAME="${{ vars.APP_NAME }}"
             RESOURCE_GROUP="${{ vars.RESOURCE_GROUP }}"
-            # ---------------------
 
             az config set extension.use_dynamic_install=yes_without_prompt
-
             az extension add --name containerapp --upgrade
 
-            az version
+            # Get the latest active revision name
+            LATEST_REVISION=$(az containerapp revision list \
+              --name "$APP_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --query "[?properties.active==\`true\`].name | [0]" \
+              --output tsv)
 
-            echo "Getting App ID for '$APP_NAME'..."
-            # distinct way to find the app that doesn't rely on the broken 'containerapp' command
-            APP_ID=$(az resource show --resource-group "$RESOURCE_GROUP" --name "$APP_NAME" --resource-type "Microsoft.App/containerApps" --query id --output tsv)
-            
-            if [ -z "$APP_ID" ]; then
-              echo "Error: Could not find Container App. Check your variables!"
+            if [ -z "$LATEST_REVISION" ]; then
+              echo "Error: No active revision found for $APP_NAME"
               exit 1
             fi
-            echo "Found App ID: $APP_ID"
 
-            echo "Stopping container app..."
-            az containerapp stop --name $APP_NAME --resource-group $RESOURCE_GROUP
+            echo "Restarting revision: $LATEST_REVISION to pull latest image..."
             
-            # Loop to verify it's stopped
-            echo "Waiting for status 'Stopped'..."
-            while [ "$(az containerapp show --name $APP_NAME --resource-group $RESOURCE_GROUP --query properties.runningStatus -o tsv)" != "Stopped" ]; do
-              sleep 5
-              echo -n "."
-            done
-            echo ""
-            echo "Container stopped."
+            # Restart the specific revision
+            az containerapp revision restart \
+              --name "$APP_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --revision "$LATEST_REVISION"
 
-            echo "Starting container app..."
-            az containerapp start --name $APP_NAME --resource-group $RESOURCE_GROUP
-
-            # Loop to verify it's running
-            echo "Waiting for status 'Running'..."
-            while [ "$(az containerapp show --name $APP_NAME --resource-group $RESOURCE_GROUP --query properties.runningStatus -o tsv)" != "Running" ]; do
-              sleep 5
-              echo -n "."
-            done
-            echo ""
-            echo "Container is up and running!"
+            echo "Restart command issued successfully."
